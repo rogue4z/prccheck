@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Code Match Checker</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .input-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .box h2 {
+            margin-top: 0;
+            font-size: 18px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 300px;
+            resize: vertical;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            display: block;
+            margin: 25px auto;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #1976d2;
+            color: white;
+        }
+
+        button:hover {
+            background: #125ca3;
+        }
+
+        #results {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .match {
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            background: #e8f5e9;
+        }
+
+        .no-match {
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            background: #ffebee;
+        }
+
+        @media (max-width: 700px) {
+            .input-area {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Code Match Checker</h1>
+
+    <div class="input-area">
+
+        <div class="box">
+            <h2>Primary List</h2>
+            <textarea id="primaryInput"
+                placeholder="Paste primary codes here..."></textarea>
+        </div>
+
+        <div class="box">
+            <h2>Secondary List</h2>
+            <textarea id="secondaryInput"
+                placeholder="Paste secondary codes here..."></textarea>
+        </div>
+
+    </div>
+
+    <button id="checkBtn">CHECK MATCHES</button>
+
+    <div id="results">
+        <h2>Results</h2>
+
+         <button id="copyMatchedBtn">COPY MATCHED CODES</button>
+        <div id="resultContent">
+            Results will appear here.
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    let matchedCodes = [];
+
+
+    document.getElementById("checkBtn").addEventListener("click", function () {
+
+        const primaryText =
+            document.getElementById("primaryInput").value;
+
+        const secondaryText =
+            document.getElementById("secondaryInput").value;
+
+        const primaryCodes = primaryText
+            .split(/\r?\n/)
+            .map(code => code.trim())
+            .filter(code => code !== "");
+
+        const secondaryCodes = secondaryText
+            .split(/\r?\n/)
+            .map(code => code.trim())
+            .filter(code => code !== "");
+
+        const resultContent =
+            document.getElementById("resultContent");
+
+        resultContent.innerHTML = "";
+        matchedCodes = [];
+       
+
+        
+
+        /*
+         * Create a lookup set from the PRIMARY list.
+         *
+         * Only the first 4 characters and last 4 characters
+         * are used.
+         */
+
+        const primaryKeys = new Set();
+
+        primaryCodes.forEach(code => {
+
+            if (code.length < 8) return;
+
+            const firstFour = code.substring(0, 4).toUpperCase();
+            const lastFour = code.slice(-4);
+
+            const key = firstFour + "|" + lastFour;
+
+            primaryKeys.add(key);
+        });
+
+
+        /*
+         * Check every SECONDARY code.
+         */
+
+        secondaryCodes.forEach(code => {
+
+            if (code.length < 8) {
+                const div = document.createElement("div");
+
+                div.className = "no-match";
+
+                div.textContent =
+                    `${code} → INVALID CODE`;
+
+                resultContent.appendChild(div);
+
+                return;
+            }
+
+            const firstFour = code.substring(0, 4).toUpperCase();
+            const lastFour = code.slice(-4);
+
+            const key = firstFour + "|" + lastFour;
+
+
+            if (primaryKeys.has(key)) {
+
+                 matchedCodes.push(code);
+                const div = document.createElement("div");
+
+                div.className = "match";
+
+                div.textContent =
+                    `${code} → COMPLETE MATCH`;
+
+                resultContent.appendChild(div);
+
+            } else {
+
+                const div = document.createElement("div");
+
+                div.className = "no-match";
+
+                div.textContent =
+                    `${code} → NO MATCH`;
+
+                resultContent.appendChild(div);
+            }
+
+        });
+
+    });
+
+           
+
+    document.getElementById("copyMatchedBtn").addEventListener("click", function () {
+
+        if (matchedCodes.length === 0) {
+            alert("No matched codes to copy.");
+            return;
+        }
+
+        navigator.clipboard.writeText(matchedCodes.join("\n"))
+            .then(() => {
+                alert(`${matchedCodes.length} matched codes copied!`);
+            })
+            .catch(() => {
+                alert("Could not copy the codes.");
+            });
+
+    });
+
+
+</script>
+
+</body>
+</html>
