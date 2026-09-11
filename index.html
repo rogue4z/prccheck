@@ -100,6 +100,14 @@
                 grid-template-columns: 1fr;
             }
         }
+         
+        #matchedCodeList,
+        #unmatchedCodeList {
+        white-space: pre-line;
+        font-family: monospace;
+        line-height: 1.8;
+        }
+    
     </style>
 </head>
 
@@ -121,26 +129,45 @@
             <h2>Secondary List</h2>
             <textarea id="secondaryInput"
                 placeholder="Paste secondary codes here..."></textarea>
+                 <button id="clearSecondaryBtn">CLEAR SECONDARY LIST</button>
         </div>
+       
 
     </div>
 
     <button id="checkBtn">CHECK MATCHES</button>
 
-    <div id="results">
-        <h2>Results</h2>
+    <div id="results"> 
+    <h2>Results</h2>
 
-         <button id="copyMatchedBtn">COPY MATCHED CODES</button>
-        <div id="resultContent">
-            Results will appear here.
-        </div>
+    <button id="copyMatchedBtn">COPY MATCHED CODES</button>
+    <button id="copyUnmatchedBtn">COPY UNMATCHED CODES</button>
+
+    <h3>Matched Codes</h3>
+
+    <div id="matchedCodeList">
+        No matched codes yet.
     </div>
+
+    <h3>Unmatched Codes</h3>
+
+    <div id="unmatchedCodeList">
+    No unmatched codes yet.
+   </div>
+
+    <h3>All Results</h3>
+
+    <div id="resultContent"> 
+        Results will appear here. 
+    </div> 
+ </div>
 
 </div>
 
 <script>
 
     let matchedCodes = [];
+    let unmatchedCodes = [];
 
 
     document.getElementById("checkBtn").addEventListener("click", function () {
@@ -166,6 +193,10 @@
 
         resultContent.innerHTML = "";
         matchedCodes = [];
+        unmatchedCodes = [];
+
+    document.getElementById("matchedCodeList").innerHTML = "";
+    document.getElementById("unmatchedCodeList").innerHTML = "";
        
 
         
@@ -231,6 +262,7 @@
 
             } else {
 
+                unmatchedCodes.push(code);
                 const div = document.createElement("div");
 
                 div.className = "no-match";
@@ -243,9 +275,28 @@
 
         });
 
+        const matchedCodeList =
+    document.getElementById("matchedCodeList");
+
+    if (matchedCodes.length === 0) {
+    matchedCodeList.textContent = "No matched codes.";
+     } else {
+    matchedCodeList.textContent =
+        matchedCodes.join("\n");
+    }
+
+      const unmatchedCodeList =
+    document.getElementById("unmatchedCodeList");
+
+      if (unmatchedCodes.length === 0) {
+    unmatchedCodeList.textContent = "No unmatched codes.";
+     } else {
+    unmatchedCodeList.textContent =
+        unmatchedCodes.join("\n");
+     }
+
     });
 
-           
 
     document.getElementById("copyMatchedBtn").addEventListener("click", function () {
 
@@ -261,6 +312,29 @@
             .catch(() => {
                 alert("Could not copy the codes.");
             });
+
+    document.getElementById("copyUnmatchedBtn").addEventListener("click", function () {
+
+    if (unmatchedCodes.length === 0) {
+        alert("No unmatched codes to copy.");
+        return;
+    }
+
+    navigator.clipboard.writeText(unmatchedCodes.join("\n"))
+        .then(() => {
+            alert(`${unmatchedCodes.length} unmatched codes copied!`);
+        })
+        .catch(() => {
+            alert("Could not copy the codes.");
+        });
+
+     });
+        
+     document.getElementById("clearSecondaryBtn").addEventListener("click", function () {
+
+    document.getElementById("secondaryInput").value = "";
+
+       });
 
     });
 
